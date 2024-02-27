@@ -1,110 +1,75 @@
 {
-  "identifier": "yetone.openai.translator",
-  "version": "2.2.4",
+  "identifier": "vkingw.local_model.translator",
+  "version": "0.0.1",
   "category": "translate",
-  "name": "OpenAI Translator",
-  "summary": "GPT powered translator",
+  "name": "Local Model Translator",
+  "summary": "Local Model powered translator",
   "icon": "",
-  "author": "yetone <yetoneful@gmail.com>",
-  "homepage": "https://github.com/yetone/bob-plugin-openai-translator",
-  "appcast": "https://raw.githubusercontent.com/yetone/bob-plugin-openai-translator/main/appcast.json",
+  "author": "vkingw <alfa.king+git@gmail.com>",
+  "homepage": "https://github.com/vkingw/bob-plugin-local-translator",
+  "appcast": "https://raw.githubusercontent.com/vkingw/bob-plugin-local-translator/main/appcast.json",
   "minBobVersion": "1.8.0",
   "options": [
     {
       "identifier": "apiUrl",
       "type": "text",
       "title": "API URL",
-      "defaultValue": "https://api.openai.com",
-      "desc": "可选项。如果您的网络环境需要代理才能访问 OpenAI API, 可在这里修改为反代 API 的地址",
+      "defaultValue": "http://localhost:11434/api/chat",
+      "desc": "必填项。此值为访问本地模型 API 的 URL",
       "textConfig": {
         "type": "visible",
-        "placeholderText": "https://api.openai.com"
-      }
-    },
-    {
-      "identifier": "deploymentName",
-      "type": "text",
-      "title": "Dep. Name",
-      "desc": "可选项。此值为在部署 Azure 模型时为部署选择的自定义名称，可在 Azure 门户中的 “资源管理”＞“部署” 下查看",
-      "textConfig": {
-        "type": "visible"
-      }
-    },
-    {
-      "identifier": "apiVersion",
-      "type": "text",
-      "title": "API Version",
-      "defaultValue": "2023-03-15-preview",
-      "desc": "可选项。此值为在使用 Azure 模型时采用的 Chat completions API 版本，不支持 2023-03-15-preview 之前的版本",
-      "textConfig": {
-        "type": "visible",
-        "placeholderText": "2023-03-15-preview"
-      }
-    },
-    {
-      "identifier": "apiKeys",
-      "type": "text",
-      "title": "API KEY",
-      "desc": "必填项。可以用英文逗号分割多个 API KEY 以实现额度加倍及负载均衡",
-      "textConfig": {
-        "type": "secure",
-        "height": "40",
-        "placeholderText": "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        "placeholderText": "http://localhost:11434/api/chat"
       }
     },
     {
       "identifier": "model",
       "type": "menu",
       "title": "模型",
-      "defaultValue": "gpt-3.5-turbo",
+      "defaultValue": "gemma:2b",
       "menuValues": [
         {
           "title": "custom",
           "value": "custom"
         },
         {
-          "title": "gpt-3.5-turbo-1106 (recommended)",
-          "value": "gpt-3.5-turbo-1106"
+          "title": "llama2",
+          "value": "llama2"
         },
         {
-          "title": "gpt-3.5-turbo-0613",
-          "value": "gpt-3.5-turbo-0613"
+          "title": "mistral",
+          "value": "mistral"
         },
         {
-          "title": "gpt-3.5-turbo-0301",
-          "value": "gpt-3.5-turbo-0301"
+          "title": "dolphin-phi",
+          "value": "dolphin-phi"
         },
         {
-          "title": "gpt-3.5-turbo-16k",
-          "value": "gpt-3.5-turbo-16k"
+          "title": "phi",
+          "value": "phi"
         },
         {
-          "title": "gpt-3.5-turbo",
-          "value": "gpt-3.5-turbo"
+          "title": "codellama",
+          "value": "codellama"
         },
         {
-          "title": "gpt-4",
-          "value": "gpt-4"
+          "title": "llama2-uncensored",
+          "value": "llama2-uncensored"
         },
         {
-          "title": "gpt-4-0314",
-          "value": "gpt-4-0314"
+          "title": "llama2:13b",
+          "value": "llama2:13b"
         },
         {
-          "title": "gpt-4-0613",
-          "value": "gpt-4-0613"
+          "title": "llava",
+          "value": "llava"
         },
         {
-          "title": "gpt-4-32k",
-          "value": "gpt-4-32k"
+          "title": "gemma:2b",
+          "value": "gemma:2b"
         },
         {
-          "title": "gpt-4-32k-0314",
-          "value": "gpt-4-32k-0314"
-        },
-        {
-          "title": "gpt-4-32k-0613",
-          "value": "gpt-4-32k-0613"
+          "title": "gemma:7b",
+          "value": "gemma:7b"
         }
       ]
     },

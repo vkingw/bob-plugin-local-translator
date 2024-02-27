@@ -45,11 +45,11 @@ jobs:
           MESSAGE: ${{ steps.tag.outputs.message }}
         run: |
           python3 scripts/update_release.py "$VERSION" "$MESSAGE"
-      
+
       - name: Commit files
         run: |
-          git config --global user.name 'Bryan Lee'
-          git config --global user.email '38807139+liby@users.noreply.github.com'
+          git config --global user.name 'Vincent'
+          git config --global user.email 'alfa.king+git@gmail.com'
           git commit -am 'chore: update appcast.json and info.json'
 
       - name: Push changes

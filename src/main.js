@@ -15,9 +15,9 @@ var {
 
 /**
  * @param {Bob.TranslateQuery} query
- * @returns {{ 
- *  generatedSystemPrompt: string, 
- *  generatedUserPrompt: string 
+ * @returns {{
+ *  generatedSystemPrompt: string,
+ *  generatedUserPrompt: string
  * }}
 */
 function generatePrompts(query) {
@@ -62,7 +62,7 @@ function generatePrompts(query) {
 /**
  * @param {string} model
  * @param {Bob.TranslateQuery} query
- * @returns {{ 
+ * @returns {{
  *  model: string;
  *  temperature: number;
  *  max_tokens: number;
@@ -193,12 +193,9 @@ function translate(query) {
         });
     }
 
-    const { 
-        apiKeys, 
-        apiUrl, 
-        apiVersion, 
-        customModel, 
-        deploymentName,
+    const {
+        apiUrl,
+        customModel,
         model,
         stream,
     } = $option;
@@ -212,37 +209,11 @@ function translate(query) {
         });
     }
 
-    if (!apiKeys) {
-        handleGeneralError(query, {
-            type: "secretKey",
-            message: "配置错误 - 请确保您在插件配置中填入了正确的 API Keys",
-            addition: "请在插件配置中填写 API Keys",
-        });
-    }
-
     const modelValue = isCustomModelRequired ? customModel : model;
 
-    const apiKey = getApiKey($option.apiKeys);
+    const baseUrl = ensureHttpsAndNoTrailingSlash(apiUrl);
 
-    const baseUrl = ensureHttpsAndNoTrailingSlash(apiUrl || "https://api.openai.com");
-    let apiUrlPath = baseUrl.includes("gateway.ai.cloudflare.com") ? "/chat/completions" : "/v1/chat/completions";
-    const apiVersionQuery = apiVersion ? `?api-version=${apiVersion}` : "?api-version=2023-03-15-preview";
-    
-    const isAzureServiceProvider = baseUrl.includes("openai.azure.com");
-    if (isAzureServiceProvider) {
-        if (deploymentName) {
-            apiUrlPath = `/openai/deployments/${deploymentName}/chat/completions${apiVersionQuery}`;
-        } else {
-            handleGeneralError(query,{
-                type: "secretKey",
-                message: "配置错误 - 未填写 Deployment Name",
-                addition: "请在插件配置中填写 Deployment Name",
-                troubleshootingLink: "https://bobtranslate.com/service/translate/azureopenai.html"
-            });
-        } 
-    }
 
-    const header = buildHeader(isAzureServiceProvider, apiKey);
     const body = buildRequestBody(modelValue, query);
 
     let targetText = ""; // 初始化拼接结果变量
@@ -251,8 +222,7 @@ function translate(query) {
         if (stream) {
             await $http.streamRequest({
                 method: "POST",
-                url: baseUrl + apiUrlPath,
-                header,
+                url: baseUrl,
                 body: {
                     ...body,
                     stream: true,
@@ -301,11 +271,10 @@ function translate(query) {
         } else {
             const result = await $http.request({
                 method: "POST",
-                url: baseUrl + apiUrlPath,
-                header,
+                url: baseUrl ,
                 body,
             });
-    
+
             if (result.error) {
                 handleGeneralError(query, result);
             } else {
@@ -321,110 +290,10 @@ function supportLanguages() {
     return lang.supportLanguages.map(([standardLang]) => standardLang);
 }
 
-
-/**
- * @type {Bob.PluginValidate}
- */
-function pluginValidate(completion) {
-    const { apiKeys, apiUrl, apiVersion, deploymentName } = $option;
-    if (!apiKeys) {
-        handleValidateError(completion, {
-            type: "secretKey",
-            message: "配置错误 - 请确保您在插件配置中填入了正确的 API Keys",
-            addition: "请在插件配置中填写正确的 API Keys",
-            troubleshootingLink: "https://bobtranslate.com/service/translate/openai.html"
-        });
-        return;
-    }
-
-    const apiKey = getApiKey(apiKeys);
-    const baseUrl = ensureHttpsAndNoTrailingSlash(apiUrl || "https://api.openai.com");
-    let apiUrlPath = baseUrl.includes("gateway.ai.cloudflare.com") ? "/models" : "/v1/models";
-
-    const isAzureServiceProvider = apiUrl.includes("openai.azure.com");
-    if (isAzureServiceProvider) {
-        if (!deploymentName) {
-            handleValidateError(completion, {
-                type: "secretKey",
-                message: "配置错误 - 未填写 Deployment Name",
-                addition: "请在插件配置中填写 Deployment Name",
-                troubleshootingLink: "https://bobtranslate.com/service/translate/azureopenai.html"
-            });
-            return;
-        }
-        apiUrlPath = `/openai/deployments/${deploymentName}/chat/completions?api-version=2023-05-15`;
-    }
-
-    const header = buildHeader(isAzureServiceProvider, apiKey);
-    (async () => {
-        if (isAzureServiceProvider) {
-            $http.request({
-                method: "POST",
-                url: baseUrl+apiUrlPath,
-                header: header,
-                body: {
-                    "messages":[{
-                        "content": "You are a helpful assistant.",
-                        "role": "system",
-                    }, {
-                        "content": "Test connection.",
-                        "role": "user",
-                    }],
-                    max_tokens: 5
-                },
-                handler: function(resp) {
-                    if (resp.data.error) {
-                        const { statusCode } = resp.response;
-                        const reason = (statusCode >= 400 && statusCode < 500) ? "param" : "api";
-                        handleValidateError(completion, {
-                            type: reason,
-                            message: resp.data.error,
-                            troubleshootingLink: "https://bobtranslate.com/service/translate/azureopenai.html"
-                        });
-                        return;
-                    }
-                    if (resp.data.choices.length > 0) {
-                        completion({
-                            result: true,
-                        })
-                    }
-                }
-            });
-        } else {
-            $http.request({
-                method: "GET",
-                url: baseUrl+apiUrlPath,
-                header: header,
-                handler: function(resp) {
-                    if (resp.data.error) {
-                        const { statusCode } = resp.response;
-                        const reason = (statusCode >= 400 && statusCode < 500) ? "param" : "api";
-                        handleValidateError(completion, {
-                            type: reason,
-                            message: resp.data.error,
-                            troubleshootingLink: "https://bobtranslate.com/service/translate/openai.html"
-                        });
-                        return;
-                    }
-                    const modelList = resp.data
-                    if (modelList.data?.length > 0) {
-                        completion({
-                            result: true,
-                        })
-                    }
-                }
-            });
-        }
-    })().catch((err) => {
-        handleValidateError(completion, err);
-    });
-}
-
 function pluginTimeoutInterval() {
     return 60;
 }
 
 exports.pluginTimeoutInterval = pluginTimeoutInterval;
-exports.pluginValidate = pluginValidate;
 exports.supportLanguages = supportLanguages;
 exports.translate = translate;

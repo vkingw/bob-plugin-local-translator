@@ -1,9 +1,5 @@
 # How To Contribute
 
-## Triage Issues and Help Out in Discussions
-
-Check out the issues and discussions for the project you want to help. For example, here are [the issues](https://github.com/openai-translator/bob-plugin-openai-translator/issues) board and [discussions](https://github.com/openai-translator/bob-plugin-openai-translator/discussions) for OpenAI Translator Bob Plugin. Helping other users, sharing workarounds, creating reproductions, or even poking into a bug a little bit and sharing your findings makes a huge difference.
-
 ## Creating an Issue
 
 Thank you for taking the time to create an issue! 🥰
@@ -22,7 +18,7 @@ We always welcome pull requests! 🥰
 
 Before you fix a bug, we recommend that you check whether **there's an issue that describes it**, as it's possible it's a documentation issue or that there is some context that would be helpful to know.
 
-If you're working on a feature, then we ask that you **open a feature request issue first** to discuss with the maintainers whether the feature is desired - and the design of those features. This helps save time for both the maintainers and the contributors and means that features can be shipped faster. 
+If you're working on a feature, then we ask that you **open a feature request issue first** to discuss with the maintainers whether the feature is desired - and the design of those features. This helps save time for both the maintainers and the contributors and means that features can be shipped faster.
 
 For typo fixes, it's recommended to batch multiple typo fixes into one pull request to maintain a cleaner commit history.
 
