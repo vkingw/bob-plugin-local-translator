@@ -5,10 +5,7 @@ var SYSTEM_PROMPT = require("./const.js").SYSTEM_PROMPT;
 
 var {
     buildHeader,
-    ensureHttpsAndNoTrailingSlash,
-    getApiKey,
     handleGeneralError,
-    handleValidateError,
     replacePromptKeywords
 } = require("./utils.js");
 
@@ -64,11 +61,6 @@ function generatePrompts(query) {
  * @param {Bob.TranslateQuery} query
  * @returns {{
  *  model: string;
- *  temperature: number;
- *  max_tokens: number;
- *  top_p: number;
- *  frequency_penalty: number;
- *  presence_penalty: number;
  *  messages?: {
  *    role: "system" | "user";
  *    content: string;
@@ -86,17 +78,7 @@ function buildRequestBody(model, query) {
     const systemPrompt = customSystemPrompt || generatedSystemPrompt;
     const userPrompt = customUserPrompt || generatedUserPrompt;
 
-    const standardBody = {
-        model: model,
-        temperature: 0.2,
-        max_tokens: 1000,
-        top_p: 1,
-        frequency_penalty: 1,
-        presence_penalty: 1,
-    };
-
     return {
-        ...standardBody,
         model: model,
         messages: [
             {
@@ -151,18 +133,18 @@ function handleStreamResponse(query, targetText, textFromResponse) {
  * @returns {void}
 */
 function handleGeneralResponse( query, result) {
-    const { choices } = result.data;
+    const { content} = result.messages;
 
-    if (!choices || choices.length === 0) {
+    if (!content || content.length === 0) {
         handleGeneralError(query, {
             type: "api",
-            message: "接口未返回结果",
+            message: "接口未返回结果"+JSON.stringify(result) ,
             addition: JSON.stringify(result),
         });
         return;
     }
 
-    let targetText = choices[0].message.content.trim();
+    let targetText = content.trim();
 
     // 使用正则表达式删除字符串开头和结尾的特殊字符
     targetText = targetText.replace(/^(『|「|"|“)|(』|」|"|”)$/g, "");
@@ -211,48 +193,38 @@ function translate(query) {
 
     const modelValue = isCustomModelRequired ? customModel : model;
 
-    const baseUrl = ensureHttpsAndNoTrailingSlash(apiUrl);
+    const baseUrl = apiUrl;
 
-
+    const header = buildHeader();
     const body = buildRequestBody(modelValue, query);
 
-    let targetText = ""; // 初始化拼接结果变量
-    let buffer = ""; // 新增 buffer 变量
     (async () => {
         if (stream) {
+            let resultText = "";
+            $log.info(JSON.stringify(body));
             await $http.streamRequest({
                 method: "POST",
-                url: baseUrl,
+                url: "http://localhost:11434/api/chat",
+                header,
                 body: {
                     ...body,
                     stream: true,
                 },
                 cancelSignal: query.cancelSignal,
-                streamHandler: (streamData) => {
-                    if (streamData.text?.includes("Invalid token")) {
-                        handleGeneralError(query, {
-                            type: "secretKey",
-                            message: "配置错误 - 请确保您在插件配置中填入了正确的 API Keys",
-                            addition: "请在插件配置中填写正确的 API Keys",
-                            troubleshootingLink: "https://bobtranslate.com/service/translate/openai.html"
-                        });
-                    } else if (streamData.text !== undefined) {
-                        // 将新的数据添加到缓冲变量中
-                        buffer += streamData.text;
-                        // 检查缓冲变量是否包含一个完整的消息
-                        while (true) {
-                            const match = buffer.match(/data: (.*?})\n/);
-                            if (match) {
-                                // 如果是一个完整的消息，处理它并从缓冲变量中移除
-                                const textFromResponse = match[1].trim();
-                                targetText = handleStreamResponse(query, targetText, textFromResponse);
-                                buffer = buffer.slice(match[0].length);
-                            } else {
-                                // 如果没有完整的消息，等待更多的数据
-                                break;
-                            }
-                        }
+                streamHandler: (stream) => {
+                    let streamText = stream.text;
+                    if (!streamText) {
+                        throw new Error("response data invalid");
                     }
+                    const resultJson = JSON.parse(streamText);
+
+                    if (!resultJson.message){
+                        throw new Error("response data invalid");
+                    }
+                    resultText += resultJson?.message?.content || "";
+                    query.onStream({
+                        result: { toParagraphs: [resultText] },
+                    });
                 },
                 handler: (result) => {
                     if (result.response.statusCode >= 400) {
@@ -262,7 +234,7 @@ function translate(query) {
                             result: {
                                 from: query.detectFrom,
                                 to: query.detectTo,
-                                toParagraphs: [targetText],
+                                toParagraphs: [resultText],
                             },
                         });
                     }
@@ -272,7 +244,11 @@ function translate(query) {
             const result = await $http.request({
                 method: "POST",
                 url: baseUrl ,
-                body,
+                header,
+                body: {
+                    ...body,
+                    stream: false,
+                },
             });
 
             if (result.error) {

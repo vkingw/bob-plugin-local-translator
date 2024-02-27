@@ -1,24 +1,19 @@
 var HttpErrorCodes = require("./const.js").HttpErrorCodes;
 
 /**
-* @param {boolean} isAzureServiceProvider - Indicates if the service provider is Azure.
-* @param {string} apiKey - The authentication API key.
 * @returns {{
   *   "Content-Type": string;
-  *   "api-key"?: string;
-  *   "Authorization"?: string;
   * }} The header object.
   */
-  function buildHeader(isAzureServiceProvider, apiKey) {
+  function buildHeader() {
     return {
         "Content-Type": "application/json",
-        [isAzureServiceProvider ? "api-key" : "Authorization"]: isAzureServiceProvider ? apiKey : `Bearer ${apiKey}`
     };
   }
 
 /**
  * @param {string}  url
- * @returns {string} 
+ * @returns {string}
 */
 function ensureHttpsAndNoTrailingSlash(url) {
   const hasProtocol = /^[a-z]+:\/\//i.test(url);
@@ -40,7 +35,7 @@ function getApiKey(apiKeys) {
 /**
  * @param {Bob.TranslateQuery} query
  * @param {Bob.ServiceError | Bob.HttpResponse} error
- */
+  */
 function handleGeneralError(query, error) {
   if ('response' in error) {
       // 处理 HTTP 响应错误
