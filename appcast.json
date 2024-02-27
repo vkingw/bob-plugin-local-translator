@@ -2,6 +2,13 @@
   "identifier": "vincent.local_model.translator",
   "versions": [
     {
+      "version": "0.0.4",
+      "desc": "fix request error.",
+      "sha256": "cfebf1a462fa2c9fcf41520a70f16decbc53f6b9f68d93ca8fe8482c4e9c4a55",
+      "url": "https://github.com/yetone/bob-plugin-openai-translator/releases/download/v0.0.4/openai-translator-0.0.4.bobplugin",
+      "minBobVersion": "1.8.0"
+    },
+    {
       "version": "0.0.3",
       "desc": "fix identifier error.",
       "sha256": "22f9ed5738a474960055ab666b19277c296d69fc556031572f26e3fb914b5027",
