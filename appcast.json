@@ -1,5 +1,12 @@
 {
   "identifier": "vincent.local_model.translator",
   "versions": [
+    {
+      "version": "0.0.2",
+      "desc": "Initialize project",
+      "sha256": "68e82f0e5d956a54e6282da88e5d9cb58a36a36211f76d9fb0d4f34241ebf273",
+      "url": "https://github.com/yetone/bob-plugin-openai-translator/releases/download/v0.0.2/openai-translator-0.0.2.bobplugin",
+      "minBobVersion": "1.8.0"
+    }
   ]
 }

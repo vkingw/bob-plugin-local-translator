@@ -1,6 +1,6 @@
 {
   "identifier": "vkingw.local_model.translator",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "category": "translate",
   "name": "Local Model Translator",
   "summary": "Local Model powered translator",
