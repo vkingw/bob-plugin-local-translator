@@ -61,6 +61,11 @@ function generatePrompts(query) {
  * @param {Bob.TranslateQuery} query
  * @returns {{
  *  model: string;
+ *  temperature: number;
+ *  max_tokens: number;
+ *  top_p: number;
+ *  frequency_penalty: number;
+ *  presence_penalty: number;
  *  messages?: {
  *    role: "system" | "user";
  *    content: string;
@@ -78,7 +83,17 @@ function buildRequestBody(model, query) {
     const systemPrompt = customSystemPrompt || generatedSystemPrompt;
     const userPrompt = customUserPrompt || generatedUserPrompt;
 
+    const standardBody = {
+        model: model,
+        temperature: 0.2,
+        max_tokens: 1000,
+        top_p: 1,
+        frequency_penalty: 1,
+        presence_penalty: 1,
+    };
+
     return {
+        ...standardBody,
         model: model,
         messages: [
             {
